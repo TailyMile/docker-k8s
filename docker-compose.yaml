@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  helloworld:
+#    image: helloworld:2.0
+    build: ./hw
+    networks:
+      - local
+    ports:
+      - 5000:5000
+    stop_signal: SIGKILL
+
+ # generator:
+ #   image: gen:1.0
+ #   networks:
+ #     - local
+ #   stop_signal: SIGKILL
+ #   depends_on:
+ #     - helloworld
+
+  prometheus:
+    image: bitnami/prometheus
+    volumes:
+      - ./prometheus.yml:/opt/bitnami/prometheus/conf/prometheus.yml
+    networks:
+      - local
+    ports:
+      - 9090:9090
+
+  exporter:
+    image: bitnami/node-exporter
+    networks:
+      - local
+
+  grafana:
+    image: grafana/grafana
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./grafana/grafana.ini:/etc/grafana/grafana.ini
+    networks:
+      - local
+    ports:
+      - 3000:3000
+    depends_on:
+      - prometheus
+
+networks:
+  local:
+    driver: bridge
