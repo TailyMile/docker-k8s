@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prometheus
+  template:
+    metadata:
+      labels:
+        app: prometheus
+    spec:
+      containers:
+      - name: prometheus
+        image: bitnami/prometheus
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "200m"
+          limits:
+            memory: "512Mi"
+            cpu: "300m"
+        ports:
+        - containerPort: 9090
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 9090
+          initialDelaySeconds: 10
+          timeoutSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 9090
+          initialDelaySeconds: 5
+          timeoutSeconds: 10
+        volumeMounts:
+          - mountPath: /opt/bitnami/prometheus/conf/prometheus.yml
+            name: sources-config
+            readOnly: true
+      restartPolicy: Always
+      volumes:
+        - name: sources-config
+          hostPath:
+            path: /confs/prometheus.yml
+            type: File
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name:  prometheus-svc
+spec:
+  selector:
+    app:  prometheus
+  type:  ClusterIP
+  ports:
+  - name:  prometheus
+    port:  9090
+    targetPort:  9090
