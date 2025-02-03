@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "200m"
+          limits:
+            memory: "512Mi"
+            cpu: "300m"
+        ports:
+        - containerPort: 80
+        # livenessProbe:
+        #   httpGet:
+        #     path: /-/healthy
+        #     port: 80
+        #   initialDelaySeconds: 10
+        #   timeoutSeconds: 10
+        # readinessProbe:
+        #   httpGet:
+        #     path: /-/ready
+        #     port: 80
+          # initialDelaySeconds: 5
+          # timeoutSeconds: 10
+        volumeMounts:
+          - mountPath: /etc/nginx/nginx.conf
+            name: sources-config
+            readOnly: true
+      restartPolicy: Always
+      volumes:
+        - name: sources-config
+          hostPath:
+            path: /confs/nginx.conf
+            type: File
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name:  nginx-svc
+spec:
+  selector:
+    app:  nginx
+  type:  ClusterIP
+  ports:
+  - name:  nginx
+    port:  80
+    targetPort:  80
