@@ -15,6 +15,9 @@ spec:
       containers:
       - name: prometheus
         image: bitnami/prometheus
+        args:
+        - "--config.file=/etc/prometheus/prometheus.yml"
+        - "--web.external-url=http://localhost/prometheus/"
         resources:
           requests:
             memory: "256Mi"
@@ -24,20 +27,20 @@ spec:
             cpu: "300m"
         ports:
         - containerPort: 9090
-        livenessProbe:
-          httpGet:
-            path: /-/healthy
-            port: 9090
-          initialDelaySeconds: 10
-          timeoutSeconds: 10
-        readinessProbe:
-          httpGet:
-            path: /-/ready
-            port: 9090
-          initialDelaySeconds: 5
-          timeoutSeconds: 10
+        # livenessProbe:
+          # httpGet:
+          #   path: /-/ready
+          #   port: 9090
+          # initialDelaySeconds: 10
+          # timeoutSeconds: 10
+        # readinessProbe:
+          # httpGet:
+          #   path: /-/ready
+          #   port: 9090
+          # initialDelaySeconds: 5
+          # timeoutSeconds: 10
         volumeMounts:
-          - mountPath: /opt/bitnami/prometheus/conf/prometheus.yml
+          - mountPath: /etc/prometheus/prometheus.yml
             name: sources-config
             readOnly: true
       restartPolicy: Always
